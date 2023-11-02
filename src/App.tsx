@@ -1,6 +1,25 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import logo from './logo.svg';
 import './App.css';
+
+/**
+ * 8 - namespace
+ * Namespaces are a way to organize your code 
+ */
+namespace ModuleExample {
+  export function calculate1(a: number, b: number): number | never {
+    return a + b;
+  }
+
+  export function calculate2(a: number, b: number): number | never {
+    return a - b;
+  }
+}
+ 
+let result1 = ModuleExample.calculate1(5,6);
+let result2 = ModuleExample.calculate2(5,6);
+
+console.log("Result 1 ", result1, ", Result 2 ", result2);
 
 function App() {
   /** 1 - Inference
@@ -76,9 +95,101 @@ function App() {
     Shipped = 3,
     Delivered = 4,
     Cancelled = 5
-   }
+  }
    
-   let orderStatus: OrderStatus = OrderStatus.Pending;
+  let orderStatus: OrderStatus = OrderStatus.Pending;
+
+  /**
+   * 7 - keyof
+   * keyof dipake utk mendapatkan key dari Type
+   */
+  type UserKeys = keyof User; // "name" | "age"
+
+
+  /**
+   * 8 - Using Utility Types
+   * keyof dipake utk mendapatkan key dari Type
+  */
+
+  /**
+   * Pick untuk mengambil properti2x tertentu dari suatu type
+   */
+  type User2 = { name: string, age: number, email: string };
+  type UserInfo = Pick<User2, "name" | "email">;  //Cuma jadi name & email
+
+  /**
+   * Exclude untuk mengambil properti2x tertentu dari suatu type dgn cara mengeliminasi
+   */
+  type UserInfo2 = Exclude<User2, "email">;
+
+  /**
+   * Partial untuk membuat tipe nya jadi optional semua
+   */
+  type PartialUser = Partial<User2>;
+
+  /**
+   * Readonly utk membuat variable tidak bisa diganti lagi value nya
+   */
+  let andikaVar: Readonly<User2> = {name: "Andika", age: 2, email: "test@gmail.com"};
+  // andikaVar.name = "Test";
+
+
+  /**
+   * 9 - Type Guards
+   * Menjaga type operator
+   */
+
+  function isNumber(x: any): x is number {
+    return typeof x === "number";
+  }
+
+  //Using "in"
+  interface Pupil {
+    ID: string;
+  }
+  interface Adult {
+    SSN: number;
+  }
+  interface Person {
+    name: string;
+    age: number;
+  }
+  let person: Pupil | Adult | Person = {
+    name: 'Britney',
+    age: 6
+  };
+
+  const getIdentifier = (person: Pupil | Adult | Person) => {
+    if ('name' in person) {
+      return person.name;
+    }
+    else if ('ID' in person) {
+      return person.ID
+    }
+    return person.SSN;
+  }
+
+  let value3 = 3;
+  if (isNumber(value3)) {
+    value3.toFixed(2); // TypeScript knows that "value" is a number because of the type guard
+  }
+
+  /**
+   * 10 - Infer
+   * The infer keyword is a powerful feature of TypeScript that allows you to extract the type of a variable in a type.
+   */
+  type ArrayType<T> = T extends (infer U)[] ? U : never;
+  type MyArray = ArrayType<string[]>; // MyArray is of type string
+
+  type ObjectType<T> = T extends { [key: string]: infer U } ? U : never;
+  type MyObject = ObjectType<{ name: string, age: number }>; // MyObject is of type {name:string, age: number}
+
+  type PickProperties<T, U> = { [K in keyof T]: T[K] extends U ? K : never }[keyof T];
+  type P1 = PickProperties<{ a: number, b: string, c: boolean }, string | number>; // "a" | "b"
+
+  type ReturnType<T> = T extends (...args: any[]) => infer R ? R : any;
+  type R1 = ReturnType<() => string>; // string
+  type R2 = ReturnType<() => void>; // void
 
   return (
     <div className="App">
